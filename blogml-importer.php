@@ -319,6 +319,13 @@ class BlogML_Import {
 			$categories[$cat_index] = $wpdb->escape($this->xPath->getAttributes($cat_results[$cat_index], 'ref'));
 		}
 
+		$tags = array ();
+		$tag_results = $this->xPath->match("tags/tag", $post);
+		$tag_count = count($tag_results);
+		for ($tag_index = 0; $tag_index < $tag_count; $tag_index++) {
+			$tags[$tag_index] = $wpdb->escape($this->xPath->getAttributes($tag_results[$tag_index], 'ref'));
+		}
+
 		if ($post_id = post_exists($post_title, '', '')) {
 			echo '<li>';
 			printf(__('Post <i>%s</i> already exists.'), stripslashes($post_title));
@@ -352,6 +359,13 @@ class BlogML_Import {
 				}
 				wp_set_post_categories($post_id, $post_cats);
 			}	
+			
+			// Add tags.
+			if ($tag_count > 0) {
+				$post_tags = array();
+				wp_set_object_terms($post_id, $tags, 'post_tag', true );
+			}	
+			printf(' '.__('(%s tags)'), $tag_count);
 		}
 		// Now for comments
 		$commentsNodes = $this->xPath->match("comments/comment", $post);
